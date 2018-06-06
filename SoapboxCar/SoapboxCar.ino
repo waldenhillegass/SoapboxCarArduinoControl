@@ -20,8 +20,7 @@
 //Will test potentiometer in seperate tester program to get these values
 double POT_MIN = 0;
 double POT_MAX = 1023;
-
-float maxThrottleChangePerSec = .02;
+float maxThrottleChangePerSec = .2;
 
 //I have a feeling reverse mode might be finicky so here is a debug variable
 bool reversible = false;
@@ -47,7 +46,7 @@ void setup() {
   digitalWrite(PWM_PIN, LOW);
   timeLastCycle = millis();
   //targetThrottle should be zeroed before PWM starts. #safety
-  //waitForZeroThrottle();
+  waitForZeroThrottle();
 }
 
 
@@ -57,8 +56,8 @@ void loop() {
   readTargetThrottle();
 
   //All of this is for ramping the throttle;
-  long timeSinceLastCycle = millis(); - timeLastCycle;
-  double maxThrottleChange = (timeSinceLastCycle / 10000) * maxThrottleChangePerSec;
+  long timeSinceLastCycle = millis() - timeLastCycle;
+  double maxThrottleChange = ((double)timeSinceLastCycle / 1000) * maxThrottleChangePerSec;
   if (targetThrottle > (throttleLastCycle + maxThrottleChange))
   {
     throttle = throttleLastCycle + maxThrottleChange;
@@ -76,11 +75,11 @@ void loop() {
   throttleLastCycle = throttle;
 
   
-  Serial.println(throttle);
+  
   
   if (inReverse && reversible) {
 
-    PwmHighTime = (int)map(throttle, 0, 1, 1500, 1000);
+    PwmHighTime = doublemap(throttle, 0, 1, 1500, 1000);
 
     if (digitalRead(REV_BUTTON) == LOW)
     {
@@ -95,7 +94,7 @@ void loop() {
     }
   } else {
     //is not in reverse
-    PwmHighTime = (int) map(throttle, 0, 1, 1500, 2000);
+    PwmHighTime = doublemap(throttle, 0, 1, 1500, 2000);
 
     if (digitalRead(REV_BUTTON) == HIGH)
     {
@@ -111,6 +110,7 @@ void loop() {
   }
   
   Controller.writeMicroseconds(PwmHighTime);
+  Serial.println(PwmHighTime);
   delay(20);
 }
 
@@ -130,7 +130,7 @@ double readTargetThrottle() {
 void waitForZeroThrottle() {
   while (readTargetThrottle() != 0)
   {
-    Serial.println(readTargetThrottle());
+    Serial.println("Waiting for zero throttle");
     digitalWrite(LED_PIN, HIGH);
     //do nothing.
   }
