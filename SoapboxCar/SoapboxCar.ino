@@ -3,7 +3,7 @@
    June 5, 2018
 
    This program takes potentiometer data and turns it into PWM signals which can be interpreted by a SPARK or TALON SR motorcontroller.
-   NOT TESTED YET.
+   
 */
 
 #include <Servo.h>
